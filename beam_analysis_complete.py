@@ -19,10 +19,18 @@ import pywt  # For wavelet transforms
 from tqdm import tqdm
 import functools
 import contextlib
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from skimage.transform import AffineTransform, warp  # Existing import
+import math  # Added import for trigonometric functions
 
 def setup_logging(log_queue, log_filepath):
     """Improved logging setup with both file and console output"""
+    # Clear any existing handlers
     logger = logging.getLogger()
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
     logger.setLevel(logging.INFO)
     
     # Console handler
@@ -89,18 +97,63 @@ def compute_intensity_grid(grid_size, grid_height, grid_width, ellipse_mask, ima
             
     return intensity_grid
 
-def compute_zernike_moments(warped_image, n):
-    from skimage.measure import moments_zernike
-    logger = logging.getLogger()
-    moments = []
-    for n_order in range(n+1):
-        for m_order in range(-n_order, n_order+1, 2):
-            moment = moments_zernike(warped_image, n_order, m_order)
-            moments.append(moment)
-    return moments
+def compute_local_std(image, mask, block_size=5):
+    """Optimized local standard deviation computation"""
+    from scipy.ndimage import uniform_filter
+    
+    # Use uniform filter for better performance
+    mean = uniform_filter(image, size=block_size)
+    mean_sq = uniform_filter(image**2, size=block_size)
+    std = np.sqrt(mean_sq - mean**2)
+    
+    return std * mask
+
+def wait_for_input():
+    """Wait for user input to continue"""
+    while True:
+        response = input("\nPress ENTER to continue to next step (or 'q' to quit)...")
+        if response.lower() == 'q':
+            return False
+        return True
+
+# Add the custom radial_profile function
+def radial_profile(data, center, theta, radius, num_points=1000):
+    """
+    Compute the intensity values along a radial line from the center at angle theta.
+    
+    Parameters:
+        data (ndarray): 2D array of image data.
+        center (tuple): (x, y) coordinates of the center.
+        theta (float): angle in radians.
+        radius (int): maximum radius to sample.
+        num_points (int): number of points along the radial line.
+        
+    Returns:
+        intensities (ndarray): interpolated intensity values along the radial line.
+    """
+    x0, y0 = center
+    x1 = x0 + radius * np.cos(theta)
+    y1 = y0 + radius * np.sin(theta)
+    # Generate coordinates along the radial line
+    x, y = np.linspace(x0, x1, num_points), np.linspace(y0, y1, num_points)
+    # Use map_coordinates for interpolation
+    intensities = ndi.map_coordinates(data, [y, x], order=1, mode='reflect')
+    return intensities
+
+# Modify the compute_radial_slices function to use the custom radial_profile
+def compute_radial_slices(image, center, radius, num_slices):
+    """Compute intensity along radial slices from the center."""
+    radial_data = {}
+    angles = np.linspace(0, 2 * np.pi, num_slices, endpoint=False)
+    
+    for idx, angle in enumerate(angles):
+        intensity_values = radial_profile(image, center, angle, radius)
+        radial_data[f"Slice_{idx+1}"] = intensity_values.tolist()
+    
+    return radial_data
 
 def main():
-    """Improved main function with proper resource and error management"""
+    """Modified main function with step-by-step execution"""
     manager = Manager()
     log_queue = manager.Queue()
     root = None
@@ -110,11 +163,11 @@ def main():
         root = tk.Tk()
         root.withdraw()
         
-        # Setup logging first
+        # Setup initial logging
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_filepath = f"analysis_{timestamp}.log"
-        listener, logger = setup_logging(log_queue, log_filepath)
-        listener.start()
+        initial_log_filepath = f"analysis_{timestamp}.log"
+        initial_listener, logger = setup_logging(log_queue, initial_log_filepath)
+        initial_listener.start()
         
         logger.info("Starting analysis...")
         
@@ -130,15 +183,16 @@ def main():
             
         logger.info(f"Processing file: {file_path}")
         
-        # Save metadata and logging setup
+        # Save metadata and set up output logging
         metadata_output_folder = os.path.join(os.path.dirname(file_path), 'output')
         os.makedirs(metadata_output_folder, exist_ok=True)
         metadata_filename = os.path.splitext(os.path.basename(file_path))[0] + '_metadata.txt'
         metadata_filepath = os.path.join(metadata_output_folder, metadata_filename)
-        log_filepath = os.path.join(metadata_output_folder, 'analysis.log')
+        output_log_filepath = os.path.join(metadata_output_folder, 'analysis.log')
 
-        # Initialize logging
-        listener = setup_logging(log_queue, log_filepath)
+        # Setup output logging
+        output_listener, _ = setup_logging(log_queue, output_log_filepath)
+        output_listener.start()
         
         logger = logging.getLogger()
         logger.info("Analysis started.")
@@ -329,64 +383,102 @@ def main():
         # 16. Standard Deviation Map
         from scipy.ndimage import generic_filter
 
-        std_map = generic_filter(image_norm, np.std, size=5)
-        mean_std_within_ellipse = np.mean(std_map[ellipse_mask])
-        results['Mean Local Standard Deviation'] = mean_std_within_ellipse
-        logger.info(f"Mean Local Standard Deviation: {mean_std_within_ellipse}")
+        logger.info("Computing local standard deviation map...")
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(
+                compute_local_std,
+                image_norm,
+                ellipse_mask
+            )
+            try:
+                std_map = future.result(timeout=30)  # 30 second timeout
+                mean_std_within_ellipse = np.mean(std_map[ellipse_mask])
+                results['Mean Local Standard Deviation'] = mean_std_within_ellipse
+                logger.info(f"Mean Local Standard Deviation: {mean_std_within_ellipse}")
+            except TimeoutError:
+                logger.warning("Local standard deviation calculation timed out, skipping...")
+                results['Mean Local Standard Deviation'] = np.nan
 
-        # 17. Autocorrelation Function
-        from scipy.signal import correlate2d
+        # Start step-by-step execution from the point where it hangs
+        logger.info("=== Starting step-by-step execution ===")
 
-        autocorr = correlate2d(image_norm * ellipse_mask, image_norm * ellipse_mask, mode='same')
-        # Measure the central peak value
-        autocorr_peak = autocorr[autocorr.shape[0]//2, autocorr.shape[1]//2]
-        results['Autocorrelation Peak'] = autocorr_peak
-        logger.info(f"Autocorrelation Peak: {autocorr_peak}")
+        # Step 17: Autocorrelation Function (SKIP FOR NOW)
+        print("\nSkipping Autocorrelation (memory intensive)...")
+        logger.info("Skipping Autocorrelation calculation")
+        results['Autocorrelation Peak'] = np.nan
 
-        # 18. Wavelet Transform Analysis
-        coeffs2 = pywt.dwt2(image_norm * ellipse_mask, 'haar')
-        cA, (cH, cV, cD) = coeffs2
-        # Use the energy of the detail coefficients as a metric
-        wavelet_energy = np.sum(cH**2 + cV**2 + cD**2)
-        results['Wavelet Energy'] = wavelet_energy
-        logger.info(f"Wavelet Energy: {wavelet_energy}")
+        # Step 18: Wavelet Transform Analysis
+        print("\nPreparing to compute Wavelet Transform...")
+        if not wait_for_input():
+            return
+        logger.info("Computing Wavelet Transform...")
+        try:
+            # Reduce memory usage by working with a smaller portion of the image
+            masked_image = image_norm * ellipse_mask
+            max_size = 1024  # Maximum size to process
+            if (masked_image.shape[0] > max_size or masked_image.shape[1] > max_size):
+                scale = max_size / max(masked_image.shape)
+                from skimage.transform import resize
+                masked_image = resize(masked_image, 
+                                   (int(masked_image.shape[0] * scale), 
+                                    int(masked_image.shape[1] * scale)))
 
-        # 19. Zernike Polynomial Analysis
-        from skimage.transform import warp, AffineTransform
+            coeffs2 = pywt.dwt2(masked_image, 'haar')
+            cA, (cH, cV, cD) = coeffs2
+            wavelet_energy = np.sum(cH**2 + cV**2 + cD**2)
+            results['Wavelet Energy'] = wavelet_energy
+            logger.info(f"Wavelet Energy: {wavelet_energy}")
+            
+            # Clean up
+            del masked_image, coeffs2, cA, cH, cV, cD
+        except Exception as e:
+            logger.error(f"Error in Wavelet Transform: {e}")
+            results['Wavelet Energy'] = np.nan
 
-        logger.info("Starting Zernike Polynomial Analysis.")
-        # Create an affine transformation to map ellipse to circle
-        scale_transform = AffineTransform(scale=(1, minor_axis_length / (major_axis_length + 1e-8)))
-        shift_transform = AffineTransform(translation=(-cx, -cy))
-        rotate_transform = AffineTransform(rotation=-orientation)
-        transform = shift_transform + rotate_transform + scale_transform + rotate_transform.inverse + shift_transform.inverse
+        # Step 19: Zernike Polynomial Analysis (Removed)
+        # print("\nPreparing to compute Zernike Polynomial Analysis...")
+        # if not wait_for_input():
+        #     return
+        # logger.info("Starting Zernike Polynomial Analysis...")
+        # try:
+        #     # Create an affine transformation to map ellipse to circle
+        #     scale_transform = AffineTransform(scale=(1, minor_axis_length / (major_axis_length + 1e-8)))
+        #     shift_transform = AffineTransform(translation=(-cx, -cy))
+        #     rotate_transform = AffineTransform(rotation=-orientation)
+        #     transform = shift_transform + rotate_transform + scale_transform + rotate_transform.inverse + shift_transform.inverse
+        #
+        #     # Apply the transformation with error handling
+        #     try:
+        #         warped_image = warp(image_norm * ellipse_mask, transform.inverse, output_shape=image_norm.shape)
+        #         logger.info("Affine transformation applied to map ellipse to circle.")
+        #     except Exception as e:
+        #         logger.error(f"Error in warping: {e}")
+        #         results['Zernike Moment Sum'] = np.nan
+        #         raise
+        #
+        #     # Compute Zernike moments
+        #     n = 4  # Degree of Zernike polynomials
+        #     zernike_moment_array = compute_zernike_moments(warped_image, degree=n)
+        #     if zernike_moment_array.size > 0:
+        #         zernike_moment_sum = np.sum(np.abs(zernike_moment_array))
+        #         results['Zernike Moment Sum'] = zernike_moment_sum
+        #         logger.info(f"Zernike Moment Sum: {zernike_moment_sum}")
+        #     else:
+        #         results['Zernike Moment Sum'] = np.nan
+        #         logger.warning("Zernike moments could not be computed.")
+        #         
+        # except Exception as e:
+        #     logger.error(f"Error in Zernike analysis: {e}")
+        #     results['Zernike Moment Sum'] = np.nan
+        #
+        # # Clean up large arrays
+        # del warped_image
 
-        # Apply the transformation
-        warped_image = warp(image_norm * ellipse_mask, transform.inverse, output_shape=image_norm.shape)
-        logger.info("Affine transformation applied to map ellipse to circle.")
-
-        # Generate polar coordinates
-        y_indices, x_indices = np.indices(warped_image.shape)
-        x_center = warped_image.shape[1] / 2
-        y_center = warped_image.shape[0] / 2
-        r = np.sqrt((x_indices - x_center)**2 + (y_indices - y_center)**2) / (min(warped_image.shape) / 2 + 1e-8)
-        theta = np.arctan2(y_indices - y_center, x_indices - x_center)
-
-        # Limit to unit circle
-        inside_circle = r <= 1
-        zernike_intensities = warped_image[inside_circle]
-
-        # Compute Zernike moments (up to order n)
-        n = 4  # Order of Zernike polynomials
-        zernike_moments = compute_zernike_moments(warped_image, n)
-        logger.info("Zernike moments computed.")
-
-        # For simplicity, we'll just compute the sum of absolute values of moments
-        zernike_moment_sum = np.sum(np.abs(zernike_moments))
-        results['Zernike Moment Sum'] = zernike_moment_sum
-        logger.info(f"Zernike Moment Sum: {zernike_moment_sum}")
-
-        # 20. Beam Quality Factor (M^2)
+        # Step 20: Beam Quality Factor
+        print("\nPreparing to compute Beam Quality Factor...")
+        if not wait_for_input():
+            return
+        logger.info("Computing Beam Quality Factor...")
         x = np.arange(image_norm.shape[1])
         y = np.arange(image_norm.shape[0])
         X, Y = np.meshgrid(x, y)
@@ -404,7 +496,13 @@ def main():
         results['Beam Radius (Second Moment)'] = beam_radius
         logger.info(f"Beam Radius (Second Moment): {beam_radius}")
 
+        # Continue with remaining steps in the same pattern
+        # Add wait_for_input() before each major computation step
+
         # 21. Smoothness Index
+        print("\nPreparing to compute Smoothness Index...")
+        if not wait_for_input():
+            return
         # Compute gradients within the ellipse
         gradient_magnitude_within_ellipse = gradient_magnitude[ellipse_mask]
         smoothness_index = 1 / (np.sum(gradient_magnitude_within_ellipse**2) + 1e-8)
@@ -412,6 +510,9 @@ def main():
         logger.info(f"Smoothness Index: {smoothness_index}")
 
         # 22. Edge Slope Analysis
+        print("\nPreparing to compute Edge Slope Analysis...")
+        if not wait_for_input():
+            return
         from skimage.filters import sobel
 
         edge_sobel = sobel(binary_image.astype(float))
@@ -421,17 +522,26 @@ def main():
         logger.info(f"Edge Slope: {edge_slope}")
 
         # 23. Edge Uniformity Index
+        print("\nPreparing to compute Edge Uniformity Index...")
+        if not wait_for_input():
+            return
         edge_variance = np.var(edge_profile)
         results['Edge Variance'] = edge_variance
         logger.info(f"Edge Variance: {edge_variance}")
 
         # 24. Histogram Analysis
+        print("\nPreparing to compute Histogram Analysis...")
+        if not wait_for_input():
+            return
         hist_counts, _ = np.histogram(intensities, bins=256)
         hist_peak = np.max(hist_counts)
         results['Histogram Peak'] = hist_peak
         logger.info(f"Histogram Peak: {hist_peak}")
 
         # 25. Line Profiles
+        print("\nPreparing to compute Line Profiles...")
+        if not wait_for_input():
+            return
         center_x = int(cx)
         center_y = int(cy)
         horizontal_profile = image_norm[center_y, :]
@@ -445,6 +555,9 @@ def main():
         logger.info(f"Vertical Profile Deviation: {vertical_deviation}")
 
         # 26. Local Peak and Trough Detection
+        print("\nPreparing to compute Local Peak and Trough Detection...")
+        if not wait_for_input():
+            return
         from scipy.signal import find_peaks
 
         intensities_flat = intensities.flatten()
@@ -458,6 +571,9 @@ def main():
         logger.info(f"Number of Troughs: {num_troughs}")
 
         # 27. Heatmap of Regional Intensity Averages
+        print("\nPreparing to compute Heatmap of Regional Intensity Averages...")
+        if not wait_for_input():
+            return
         # Divide ellipse into grid
         grid_size = 10
         height, width = image_norm.shape
@@ -468,12 +584,93 @@ def main():
         intensity_grid = compute_intensity_grid(grid_size, grid_height, grid_width, ellipse_mask, image_norm)
         logger.info("Intensity grid computed.")
 
+        # Generate and save heatmap
+        heatmap_filepath = os.path.join(metadata_output_folder, f"heatmap_{timestamp}.png")
+        plt.figure(figsize=(8, 6))
+        plt.imshow(intensity_grid, cmap='hot', interpolation='nearest')
+        plt.colorbar(label='Mean Intensity')
+        plt.title('Heatmap of Regional Intensity Averages')
+        plt.savefig(heatmap_filepath)
+        plt.close()
+        logger.info(f"Heatmap saved to {heatmap_filepath}")
+
         # Compute variance across grid cells
         grid_variance = np.nanvar(intensity_grid)
         results['Grid Intensity Variance'] = grid_variance
         logger.info(f"Grid Intensity Variance: {grid_variance}")
 
+        # --- New Changes Start Here ---
+        
+        # Configuration for finer grid and radial slices
+        finer_grid_size = 20  # Increased grid size for finer resolution
+        finer_grid_size = 20  # You can adjust this value as needed
+        num_radial_slices = 360  # Number of radial slices up to 360 degrees
+        max_radius = min(image_norm.shape[0], image_norm.shape[1]) // 2  # Maximum radius for slices
+
+        # Update grid computation with finer grid
+        print("\nPreparing to compute Finer Heatmap of Regional Intensity Averages...")
+        if not wait_for_input():
+            return
+        logger.info("Starting finer intensity grid computation.")
+        intensity_grid = compute_intensity_grid(finer_grid_size, grid_height, grid_width, ellipse_mask, image_norm)
+        logger.info("Finer intensity grid computed.")
+
+        # Generate and save finer heatmap
+        finer_heatmap_filepath = os.path.join(metadata_output_folder, f"finer_heatmap_{timestamp}.png")
+        plt.figure(figsize=(10, 8))
+        plt.imshow(intensity_grid, cmap='hot', interpolation='nearest')
+        plt.colorbar(label='Mean Intensity')
+        plt.title('Finer Heatmap of Regional Intensity Averages')
+        plt.savefig(finer_heatmap_filepath)
+        plt.close()
+        logger.info(f"Finer Heatmap saved to {finer_heatmap_filepath}")
+
+        # --- Radial Cross-Section Slices ---
+        print("\nPreparing to compute Radial Cross-Section Slices...")
+        if not wait_for_input():
+            return
+        logger.info("Computing radial cross-section slices.")
+        
+        # Define center and radius
+        center = (cx, cy)
+        radius = max_radius
+
+        # Compute radial slices
+        radial_slices = compute_radial_slices(image_norm, center, radius, num_radial_slices)
+        
+        # Save radial slices to CSV
+        radial_csv_filepath = os.path.join(metadata_output_folder, f"radial_slices_{timestamp}.csv")
+        df_radial = pd.DataFrame(radial_slices)
+        df_radial.to_csv(radial_csv_filepath, index=False)
+        logger.info(f"Radial cross-section slices saved to {radial_csv_filepath}")
+        
+        # --- Save Cross-Sections Metadata ---
+        # Ensure metadata is not empty
+        if not metadata:
+            logger.warning("No metadata found in TIFF. Attempting to extract basic metadata.")
+            metadata = {
+                "Image Shape": image.shape,
+                "Normalized Range": f"{min_val} to {max_val}",
+                "Grid Size": finer_grid_size,
+                "Radial Slices": num_radial_slices
+            }
+            with open(metadata_filepath, 'w') as f:
+                for key, value in metadata.items():
+                    f.write(f"{key}: {value}\n")
+            logger.info("Basic metadata extracted and saved.")
+        else:
+            # Append additional metadata
+            with open(metadata_filepath, 'a') as f:
+                f.write(f"Grid Size: {finer_grid_size}\n")
+                f.write(f"Number of Radial Slices: {num_radial_slices}\n")
+            logger.info("Additional metadata appended.")
+
+        # Continue with remaining steps...
+
         # 28. Region-to-Region Intensity Difference
+        print("\nPreparing to compute Region-to-Region Intensity Difference...")
+        if not wait_for_input():
+            return
         differences = []
         for i in range(grid_size - 1):
             for j in range(grid_size - 1):
@@ -489,8 +686,12 @@ def main():
             results['Mean Region-to-Region Difference'] = np.nan
             logger.warning("No valid differences found between regions.")
 
+        # Final steps
+        print("\nPreparing to save results...")
+        if not wait_for_input():
+            return
+        logger.info("Saving results...")
         # Save results to CSV
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         csv_filename = f"results_{timestamp}.csv"
         csv_filepath = os.path.join(metadata_output_folder, csv_filename)
 
@@ -504,14 +705,20 @@ def main():
         print(f"Metadata saved to {metadata_filepath}")
 
     except Exception as e:
-        logging.exception("An error occurred during analysis.")
+        logger.exception("An error occurred during analysis.")
         print(f"An error occurred: {e}")
-        sys.exit(1)
+        return 1
     finally:
-        listener.stop()
+        # Stop both listeners if they were started
+        if 'initial_listener' in locals() and isinstance(initial_listener, QueueListener):
+            initial_listener.stop()
+        if 'output_listener' in locals() and isinstance(output_listener, QueueListener):
+            output_listener.stop()
         if root:
             root.destroy()
         manager.shutdown()
+    
+    return 0
 
 if __name__ == "__main__":
     sys.exit(main() or 0)

@@ -1,0 +1,30 @@
+2024-11-05 23:53:47,445 - INFO - Starting analysis...
+2024-11-05 23:53:51,099 - INFO - Processing file: /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_image-2.tiff
+2024-11-05 23:53:51,101 - INFO - Analysis started.
+2024-11-05 23:53:51,114 - INFO - Metadata saved.
+2024-11-05 23:53:51,295 - INFO - Otsu threshold applied: -0.42578125
+2024-11-05 23:53:51,522 - INFO - Ellipticity: 0.03049937580906989
+2024-11-05 23:53:51,768 - INFO - Elliptical mask created.
+2024-11-05 23:53:51,777 - INFO - RMS Intensity: 0.2565934956073761
+2024-11-05 23:53:51,782 - INFO - Intensity Variance: 0.05493415147066116
+2024-11-05 23:53:51,783 - INFO - Peak-to-Min Range: 1.8834351301193237
+2024-11-05 23:53:51,801 - INFO - Intensity Skewness: -0.10356727242469788
+2024-11-05 23:53:51,801 - INFO - Coefficient of Variation: 2.2443363666534424
+2024-11-05 23:53:51,847 - INFO - Signal-to-Noise Ratio: 1.1507028341293335
+2024-11-05 23:53:51,925 - INFO - Mean Gradient Magnitude: 0.06051661819219589
+2024-11-05 23:53:51,943 - INFO - GLCM Dissimilarity: 0.0
+2024-11-05 23:53:51,944 - INFO - GLCM Energy: 0.0
+2024-11-05 23:53:52,339 - INFO - Mean Frequency Content: 129.78614807128906
+2024-11-05 23:53:52,382 - INFO - Computing local standard deviation map...
+2024-11-05 23:53:52,715 - INFO - === Starting step-by-step execution ===
+2024-11-05 23:53:52,716 - INFO - Skipping Autocorrelation calculation
+2024-11-05 23:53:54,990 - INFO - Wavelet Energy: 69.21572875976562
+2024-11-05 23:53:56,507 - INFO - Beam Radius (Second Moment): nan
+2024-11-05 23:53:59,273 - INFO - Edge Slope: 0.06646519154310226
+2024-11-05 23:54:11,676 - INFO - Histogram Peak: 53611
+2024-11-05 23:54:13,916 - INFO - Vertical Profile Deviation: 0.5452433824539185
+2024-11-05 23:54:21,447 - INFO - Number of Troughs: 1283845
+2024-11-05 23:54:43,100 - INFO - Intensity grid computed.
+2024-11-05 23:54:43,195 - INFO - Grid Intensity Variance: 0.036360888809710834
+2024-11-05 23:55:53,913 - INFO - Finer intensity grid computed.
+2024-11-05 23:55:58,365 - INFO - Computing radial cross-section slices.

@@ -1,0 +1,31 @@
+2024-11-05 23:47:29,353 - INFO - Starting analysis...
+2024-11-05 23:47:31,963 - INFO - Processing file: /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_image-2.tiff
+2024-11-05 23:47:31,964 - INFO - Analysis started.
+2024-11-05 23:47:31,977 - INFO - Metadata saved.
+2024-11-05 23:47:32,187 - INFO - Otsu threshold applied: -0.42578125
+2024-11-05 23:47:32,416 - INFO - Ellipticity: 0.03049937580906989
+2024-11-05 23:47:32,417 - INFO - Eccentricity: 0.24326946992340182
+2024-11-05 23:47:32,749 - INFO - Extracted 3852496 intensity values within the ellipse.
+2024-11-05 23:47:32,755 - INFO - Mean Intensity: 0.10443191230297089
+2024-11-05 23:47:32,759 - INFO - Intensity Standard Deviation: 0.2343803495168686
+2024-11-05 23:47:32,760 - INFO - Uniformity Index: -4.037042140960693
+2024-11-05 23:47:32,778 - INFO - Intensity Kurtosis: 0.05468249320983887
+2024-11-05 23:47:32,799 - INFO - Entropy: 7.019244632441269
+2024-11-05 23:47:32,824 - INFO - Contrast Ratio: -1.131945013999939
+2024-11-05 23:47:32,949 - INFO - GLCM Contrast: 0.0
+2024-11-05 23:47:32,949 - INFO - GLCM Homogeneity: 0.0
+2024-11-05 23:47:32,950 - INFO - GLCM Energy: 0.0
+2024-11-05 23:47:33,377 - INFO - Mean Frequency Content: 129.78614807128906
+2024-11-05 23:47:33,423 - INFO - Computing local standard deviation map...
+2024-11-05 23:47:33,779 - INFO - === Starting step-by-step execution ===
+2024-11-05 23:47:35,709 - INFO - Computing Wavelet Transform...
+2024-11-05 23:47:37,355 - INFO - Computing Beam Quality Factor...
+2024-11-05 23:47:39,138 - INFO - Smoothness Index: 5.5647233239142224e-05
+2024-11-05 23:47:43,460 - INFO - Edge Variance: 0.0011202438035979867
+2024-11-05 23:47:44,633 - INFO - Horizontal Profile Deviation: 0.5585159659385681
+2024-11-05 23:47:45,736 - INFO - Number of Peaks: 1283844
+2024-11-05 23:47:46,953 - INFO - Starting Heatmap of Regional Intensity Averages.
+2024-11-05 23:48:01,845 - INFO - Heatmap saved to /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/output/heatmap_20241105_234729.png
+2024-11-05 23:48:03,827 - INFO - Mean Region-to-Region Difference: 0.13884095720445308
+2024-11-05 23:48:06,314 - INFO - Results saved to /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/output/results_20241105_234729.csv
+2024-11-05 23:48:06,314 - INFO - Analysis completed.

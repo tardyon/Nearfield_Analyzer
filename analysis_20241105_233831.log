@@ -1,0 +1,60 @@
+2024-11-05 23:38:31,357 - INFO - Starting analysis...
+2024-11-05 23:38:37,674 - INFO - Processing file: /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_image-2.tiff
+2024-11-05 23:38:37,675 - INFO - Analysis started.
+2024-11-05 23:38:37,687 - INFO - Metadata saved.
+2024-11-05 23:38:37,734 - INFO - Image normalized.
+2024-11-05 23:38:37,869 - INFO - Otsu threshold applied: -0.42578125
+2024-11-05 23:38:38,073 - INFO - Largest region identified.
+2024-11-05 23:38:38,089 - INFO - Ellipticity: 0.03049937580906989
+2024-11-05 23:38:38,089 - INFO - Aspect Ratio: 0.9699587439696531
+2024-11-05 23:38:38,090 - INFO - Eccentricity: 0.24326946992340182
+2024-11-05 23:38:38,329 - INFO - Elliptical mask created.
+2024-11-05 23:38:38,335 - INFO - Extracted 3852496 intensity values within the ellipse.
+2024-11-05 23:38:38,338 - INFO - RMS Intensity: 0.2565934956073761
+2024-11-05 23:38:38,338 - INFO - Mean Intensity: 0.10443191230297089
+2024-11-05 23:38:38,343 - INFO - Intensity Variance: 0.05493415147066116
+2024-11-05 23:38:38,343 - INFO - Intensity Standard Deviation: 0.2343803495168686
+2024-11-05 23:38:38,344 - INFO - Peak-to-Min Range: 1.8834351301193237
+2024-11-05 23:38:38,344 - INFO - Uniformity Index: -4.037042140960693
+2024-11-05 23:38:38,361 - INFO - Intensity Skewness: -0.10356727242469788
+2024-11-05 23:38:38,361 - INFO - Intensity Kurtosis: 0.05468249320983887
+2024-11-05 23:38:38,361 - INFO - Coefficient of Variation: 2.2443363666534424
+2024-11-05 23:38:38,383 - INFO - Entropy: 7.019244632441269
+2024-11-05 23:38:38,406 - INFO - Signal-to-Noise Ratio: 1.1507028341293335
+2024-11-05 23:38:38,406 - INFO - Contrast Ratio: -1.131945013999939
+2024-11-05 23:38:38,480 - INFO - Mean Gradient Magnitude: 0.06051661819219589
+2024-11-05 23:38:38,499 - INFO - GLCM Contrast: 0.0
+2024-11-05 23:38:38,499 - INFO - GLCM Dissimilarity: 0.0
+2024-11-05 23:38:38,499 - INFO - GLCM Homogeneity: 0.0
+2024-11-05 23:38:38,499 - INFO - GLCM ASM: 0.0
+2024-11-05 23:38:38,499 - INFO - GLCM Energy: 0.0
+2024-11-05 23:38:38,499 - INFO - GLCM Correlation: 1.0
+2024-11-05 23:38:38,884 - INFO - Mean Frequency Content: 129.78614807128906
+2024-11-05 23:38:38,926 - INFO - Mean PSD: 253648.5625
+2024-11-05 23:38:38,926 - INFO - Computing local standard deviation map...
+2024-11-05 23:38:39,265 - INFO - Mean Local Standard Deviation: 0.0662975162267685
+2024-11-05 23:38:39,265 - INFO - === Starting step-by-step execution ===
+2024-11-05 23:38:39,265 - INFO - Skipping Autocorrelation calculation
+2024-11-05 23:38:44,352 - INFO - Computing Wavelet Transform...
+2024-11-05 23:38:44,597 - INFO - Wavelet Energy: 69.21572875976562
+2024-11-05 23:38:47,070 - INFO - Starting Zernike Polynomial Analysis...
+2024-11-05 23:38:47,214 - INFO - Affine transformation applied to map ellipse to circle.
+2024-11-05 23:38:47,476 - ERROR - Error computing Zernike moments: cannot import name 'moments_zernike' from 'skimage.measure' (/Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/.conda/lib/python3.12/site-packages/skimage/measure/__init__.py)
+2024-11-05 23:38:53,718 - INFO - Computing Beam Quality Factor...
+2024-11-05 23:38:53,800 - INFO - Beam Radius (Second Moment): nan
+2024-11-05 23:38:58,366 - INFO - Smoothness Index: 5.5647233239142224e-05
+2024-11-05 23:39:01,889 - INFO - Edge Slope: 0.06646519154310226
+2024-11-05 23:39:04,429 - INFO - Edge Variance: 0.0011202438035979867
+2024-11-05 23:39:06,709 - INFO - Histogram Peak: 53611
+2024-11-05 23:39:08,580 - INFO - Horizontal Profile Deviation: 0.5585159659385681
+2024-11-05 23:39:08,581 - INFO - Vertical Profile Deviation: 0.5452433824539185
+2024-11-05 23:39:11,260 - INFO - Number of Peaks: 1283844
+2024-11-05 23:39:11,260 - INFO - Number of Troughs: 1283845
+2024-11-05 23:39:13,544 - INFO - Starting Heatmap of Regional Intensity Averages.
+2024-11-05 23:39:30,511 - INFO - Intensity grid computed.
+2024-11-05 23:39:30,512 - INFO - Grid Intensity Variance: 0.036360888809710834
+2024-11-05 23:39:35,487 - INFO - Mean Region-to-Region Difference: 0.13884095720445308
+2024-11-05 23:39:37,705 - INFO - Saving results...
+2024-11-05 23:39:37,714 - INFO - Results saved to /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/output/results_20241105_233937.csv
+2024-11-05 23:39:37,714 - INFO - Metadata saved to /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/output/beam_image-2_metadata.txt
+2024-11-05 23:39:37,714 - INFO - Analysis completed.

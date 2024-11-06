@@ -1,0 +1,35 @@
+2024-11-05 23:57:18,245 - INFO - Starting analysis...
+2024-11-05 23:57:21,150 - INFO - Processing file: /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_image-2.tiff
+2024-11-05 23:57:21,151 - INFO - Analysis started.
+2024-11-05 23:57:21,164 - INFO - Metadata saved.
+2024-11-05 23:57:21,353 - INFO - Otsu threshold applied: -0.42578125
+2024-11-05 23:57:21,582 - INFO - Ellipticity: 0.03049937580906989
+2024-11-05 23:57:21,583 - INFO - Eccentricity: 0.24326946992340182
+2024-11-05 23:57:21,826 - INFO - Extracted 3852496 intensity values within the ellipse.
+2024-11-05 23:57:21,830 - INFO - Mean Intensity: 0.10443191230297089
+2024-11-05 23:57:21,834 - INFO - Intensity Standard Deviation: 0.2343803495168686
+2024-11-05 23:57:21,835 - INFO - Uniformity Index: -4.037042140960693
+2024-11-05 23:57:21,853 - INFO - Intensity Kurtosis: 0.05468249320983887
+2024-11-05 23:57:21,853 - INFO - Coefficient of Variation: 2.2443363666534424
+2024-11-05 23:57:21,897 - INFO - Signal-to-Noise Ratio: 1.1507028341293335
+2024-11-05 23:57:21,975 - INFO - Mean Gradient Magnitude: 0.06051661819219589
+2024-11-05 23:57:21,993 - INFO - GLCM Dissimilarity: 0.0
+2024-11-05 23:57:21,993 - INFO - GLCM ASM: 0.0
+2024-11-05 23:57:21,994 - INFO - GLCM Correlation: 1.0
+2024-11-05 23:57:22,427 - INFO - Mean PSD: 253648.5625
+2024-11-05 23:57:22,760 - INFO - Mean Local Standard Deviation: 0.0662975162267685
+2024-11-05 23:57:22,761 - INFO - Skipping Autocorrelation calculation
+2024-11-05 23:57:29,506 - INFO - Wavelet Energy: 69.21572875976562
+2024-11-05 23:58:04,300 - INFO - Beam Radius (Second Moment): nan
+2024-11-05 23:58:06,386 - INFO - Edge Slope: 0.06646519154310226
+2024-11-05 23:58:07,724 - INFO - Histogram Peak: 53611
+2024-11-05 23:58:08,458 - INFO - Vertical Profile Deviation: 0.5452433824539185
+2024-11-05 23:58:11,211 - INFO - Number of Troughs: 1283845
+2024-11-05 23:58:28,759 - INFO - Intensity grid computed.
+2024-11-05 23:58:28,852 - INFO - Grid Intensity Variance: 0.036360888809710834
+2024-11-05 23:59:36,614 - INFO - Finer intensity grid computed.
+2024-11-05 23:59:39,955 - INFO - Computing radial cross-section slices.
+2024-11-05 23:59:40,211 - WARNING - No metadata found in TIFF. Attempting to extract basic metadata.
+2024-11-05 23:59:45,187 - INFO - Mean Region-to-Region Difference: 0.13884095720445308
+2024-11-05 23:59:49,265 - INFO - Results saved to /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/output/results_20241105_235718.csv
+2024-11-05 23:59:49,265 - INFO - Analysis completed.

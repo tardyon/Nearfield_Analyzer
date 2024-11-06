@@ -1,0 +1,46 @@
+2024-11-05 23:27:28,942 - INFO - Starting analysis...
+2024-11-05 23:27:32,542 - INFO - Processing file: /Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_image-2.tiff
+2024-11-05 23:27:32,542 - INFO - Analysis started.
+2024-11-05 23:27:32,555 - INFO - Metadata saved.
+2024-11-05 23:27:32,603 - INFO - Image normalized.
+2024-11-05 23:27:32,741 - INFO - Otsu threshold applied: -0.42578125
+2024-11-05 23:27:32,953 - INFO - Largest region identified.
+2024-11-05 23:27:32,968 - INFO - Ellipticity: 0.03049937580906989
+2024-11-05 23:27:32,968 - INFO - Aspect Ratio: 0.9699587439696531
+2024-11-05 23:27:32,968 - INFO - Eccentricity: 0.24326946992340182
+2024-11-05 23:27:33,227 - INFO - Elliptical mask created.
+2024-11-05 23:27:33,233 - INFO - Extracted 3852496 intensity values within the ellipse.
+2024-11-05 23:27:33,236 - INFO - RMS Intensity: 0.2565934956073761
+2024-11-05 23:27:33,236 - INFO - Mean Intensity: 0.10443191230297089
+2024-11-05 23:27:33,241 - INFO - Intensity Variance: 0.05493415147066116
+2024-11-05 23:27:33,241 - INFO - Intensity Standard Deviation: 0.2343803495168686
+2024-11-05 23:27:33,242 - INFO - Peak-to-Min Range: 1.8834351301193237
+2024-11-05 23:27:33,242 - INFO - Uniformity Index: -4.037042140960693
+2024-11-05 23:27:33,263 - INFO - Intensity Skewness: -0.10356727242469788
+2024-11-05 23:27:33,263 - INFO - Intensity Kurtosis: 0.05468249320983887
+2024-11-05 23:27:33,263 - INFO - Coefficient of Variation: 2.2443363666534424
+2024-11-05 23:27:33,285 - INFO - Entropy: 7.019244632441269
+2024-11-05 23:27:33,309 - INFO - Signal-to-Noise Ratio: 1.1507028341293335
+2024-11-05 23:27:33,310 - INFO - Contrast Ratio: -1.131945013999939
+2024-11-05 23:27:33,419 - INFO - Mean Gradient Magnitude: 0.06051661819219589
+2024-11-05 23:27:33,439 - INFO - GLCM Contrast: 0.0
+2024-11-05 23:27:33,439 - INFO - GLCM Dissimilarity: 0.0
+2024-11-05 23:27:33,440 - INFO - GLCM Homogeneity: 0.0
+2024-11-05 23:27:33,440 - INFO - GLCM ASM: 0.0
+2024-11-05 23:27:33,440 - INFO - GLCM Energy: 0.0
+2024-11-05 23:27:33,440 - INFO - GLCM Correlation: 1.0
+2024-11-05 23:27:33,901 - INFO - Mean Frequency Content: 129.78614807128906
+2024-11-05 23:27:33,948 - INFO - Mean PSD: 253648.5625
+2024-11-05 23:27:33,948 - INFO - Computing local standard deviation map...
+2024-11-05 23:27:34,305 - INFO - Mean Local Standard Deviation: 0.0662975162267685
+2024-11-05 23:27:34,305 - INFO - === Starting step-by-step execution ===
+2024-11-05 23:27:34,306 - INFO - Skipping Autocorrelation calculation
+2024-11-05 23:27:42,301 - INFO - Computing Wavelet Transform...
+2024-11-05 23:27:42,725 - INFO - Wavelet Energy: 69.21572875976562
+2024-11-05 23:27:47,707 - INFO - Starting Zernike Polynomial Analysis...
+2024-11-05 23:27:47,708 - ERROR - An error occurred during analysis.
+Traceback (most recent call last):
+  File "/Users/varneymusic/Library/CloudStorage/GoogleDrive-tardyon@gmail.com/My Drive/Varney_Code_Repository/Python Programs/Nearfield_Project/Nearfield_Analyzer/beam_analysis_complete.py", line 415, in main
+    scale_transform = AffineTransform(scale=(1, minor_axis_length / (major_axis_length + 1e-8)))
+                      ^^^^^^^^^^^^^^^
+NameError: name 'AffineTransform' is not defined
